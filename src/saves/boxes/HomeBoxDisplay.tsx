@@ -1,55 +1,35 @@
-import { CSS } from '@dnd-kit/utilities'
-import {
-  Button,
-  Card,
-  DropdownMenu,
-  Flex,
-  Grid,
-  Heading,
-  TextField,
-  Tooltip,
-} from '@radix-ui/themes'
+import {CSS} from '@dnd-kit/utilities'
+import {Button, Card, DropdownMenu, Flex, Grid, Heading, TextField, Tooltip,} from '@radix-ui/themes'
 import lodash from 'lodash'
-import { ToggleGroup } from 'radix-ui'
-import { CSSProperties, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { BsFillGrid3X3GapFill } from 'react-icons/bs'
-import { FaSquare } from 'react-icons/fa'
-import { AddIcon, DevIcon, EditIcon, MenuIcon, MoveIcon, RemoveIcon } from 'src/components/Icons'
+import {ToggleGroup} from 'radix-ui'
+import {CSSProperties, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react'
+import {BsFillGrid3X3GapFill} from 'react-icons/bs'
+import {FaSquare} from 'react-icons/fa'
+import {AddIcon, DevIcon, EditIcon, MenuIcon, MoveIcon, RemoveIcon} from 'src/components/Icons'
 import PokemonDetailsModal from 'src/pokemon/PokemonDetailsModal'
-import { ErrorContext } from 'src/state/error'
-import { MonLocation, MonWithLocation } from 'src/state/saves/reducer'
-import { PKMInterface } from 'src/types/interfaces'
-import { OHPKM } from 'src/types/pkm/OHPKM'
-import { SortTypes } from 'src/types/pkm/sort'
-import { getMonFileIdentifier } from 'src/util/Lookup'
-import { DragMonContext } from '../../state/dragMon'
-import { buildBackwardNavigator, buildForwardNavigator } from '../util'
+import {ErrorContext} from 'src/state/error'
+import {MonLocation, MonWithLocation} from 'src/state/saves/reducer'
+import {PKMInterface} from 'src/types/interfaces'
+import {OHPKM} from 'src/types/pkm/OHPKM'
+import {SortTypes} from 'src/types/pkm/sort'
+import {getMonFileIdentifier} from 'src/util/Lookup'
+import {DragMonContext} from '../../state/dragMon'
+import {buildBackwardNavigator, buildForwardNavigator} from '../util'
 import ArrowButton from './ArrowButton'
 import BoxCell from './BoxCell'
 import DroppableSpace from './DroppableSpace'
 
-import {
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
-import {
-  rectSortingStrategy,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-} from '@dnd-kit/sortable'
-import { range } from 'src/util/Functional'
+import {DndContext, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors,} from '@dnd-kit/core'
+import {rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable,} from '@dnd-kit/sortable'
+import {range} from 'src/util/Functional'
 import ToggleButton from '../../components/ToggleButton'
 import useIsDev from '../../hooks/isDev'
-import { useOhpkmStore } from '../../state/ohpkm/useOhpkmStore'
-import { useSaves } from '../../state/saves/useSaves'
-import { HomeBox, HomeData } from '../../types/SAVTypes/HomeData'
-import { filterUndefined } from '../../util/Sort'
+import {useOhpkmStore} from '../../state/ohpkm/useOhpkmStore'
+import {useSaves} from '../../state/saves/useSaves'
+import {HomeBox, HomeData} from '../../types/SAVTypes/HomeData'
+import {filterUndefined} from '../../util/Sort'
 import './style.css'
+import {HomeBoxPokemonContextMenu} from "src/saves/boxes/HomeBoxPokemonContextMenu.tsx";
 
 const COLUMN_COUNT = 12
 const ROW_COUNT = 10
@@ -340,7 +320,10 @@ function BoxMons() {
                 !dragData.is_home &&
                 !dragData.save.supportsMon(mon.dexNum, mon.formeNum)
               }
-            />
+
+            >
+                {HomeBoxPokemonContextMenu()}
+            </BoxCell>
           ))}
       </Grid>
       <PokemonDetailsModal
