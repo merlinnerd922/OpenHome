@@ -212,7 +212,7 @@ const OpenSaveDisplay = (props: OpenSaveDisplayProps) => {
                   disabledReason={save.getSlotMetadata?.(save.currentPCBox, index)?.disabledReason}
                   mon={mon}
                   zIndex={1}
-                  onDrop={(importedMons) => {
+                  onDrop={(importedMons: PKMInterface[]) => {
                     if (importedMons) {
                       attemptImportMons(importedMons, {
                         is_home: false,
@@ -222,7 +222,8 @@ const OpenSaveDisplay = (props: OpenSaveDisplayProps) => {
                       })
                     }
                   }}
-                />
+                  children={undefined}
+                 />
               ))}
           </Grid>
         </Card>
