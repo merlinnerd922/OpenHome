@@ -222,8 +222,7 @@ const OpenSaveDisplay = (props: OpenSaveDisplayProps) => {
                       })
                     }
                   }}
-                  children={undefined}
-                 />
+                />
               ))}
           </Grid>
         </Card>

@@ -40,6 +40,7 @@
     "@dnd-kit/collision": "^0.1.21",
     "@dnd-kit/react": "^0.1.21",
     "@dnd-kit/sortable": "^10.0.0",
+    "@radix-ui/react-context-menu": "^2.2.16",
     "@radix-ui/themes": "^3.2.1",
     "@tanstack/react-virtual": "^3.13.12",
     "@tauri-apps/api": "^2.9.0",

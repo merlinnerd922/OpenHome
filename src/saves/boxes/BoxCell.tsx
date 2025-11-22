@@ -1,5 +1,5 @@
 import { useDroppable } from '@dnd-kit/react'
-import React, { PropsWithChildren, useContext, useMemo } from 'react'
+import { PropsWithChildren, useContext, useMemo, useState } from 'react'
 import { BackendContext } from 'src/backend/backendContext'
 import { FilterContext } from 'src/state/filter'
 import { MonLocation } from 'src/state/saves/reducer'
@@ -12,10 +12,9 @@ import useDisplayError from '../../hooks/displayError'
 import '../style.css'
 import DraggableMon from './DraggableMon'
 import DroppableSpace from './DroppableSpace'
+import { ContextMenu } from '@radix-ui/themes'
 
-export type ReactFCWithChildren = React.FC<PropsWithChildren>
-
-interface BoxCellProps extends HasChildren {
+interface BoxCellProps extends PropsWithChildren {
   onClick: () => void
   onDrop: (_: PKMInterface[]) => void
   disabled?: boolean
@@ -27,9 +26,22 @@ interface BoxCellProps extends HasChildren {
   location: MonLocation
 }
 
-type HasChildren = {
-  children: React.ReactNode
+const getUIMonContextMenu = (mon: PKMInterface | undefined) => {
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 })
+
+  const handleContextMenu = (event: { preventDefault: () => void; pageX: any; pageY: any }) => {
+    event.preventDefault()
+    setMenuPosition({ x: event.pageX, y: event.pageY })
+    // Logic to display the context menu will go here
+  }
+
+  return (
+    <ContextMenu.Root>
+      <ContextMenu.Item>Oh hello {mon?.speciesMetadata?.name}</ContextMenu.Item>
+    </ContextMenu.Root>
+  )
 }
+
 
 const BoxCell = ({
   onClick,
@@ -125,6 +137,12 @@ const BoxCell = ({
         onDropFromFiles(e.dataTransfer.files)
       }}
       title={disabledReason}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        {
+          getUIMonContextMenu(mon)
+        }
+      }}
     >
       {mon ? (
         <DraggableMon

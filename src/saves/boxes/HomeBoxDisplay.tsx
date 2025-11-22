@@ -2,6 +2,7 @@ import { CSS } from '@dnd-kit/utilities'
 import {
   Button,
   Card,
+  ContextMenu,
   DropdownMenu,
   Flex,
   Grid,
@@ -235,6 +236,14 @@ export default function HomeBoxDisplay() {
   )
 }
 
+function BoxDisplayCellContextMenu() {
+  return (
+    <ContextMenu.Root>
+      <ContextMenu.Item>Release</ContextMenu.Item>
+    </ContextMenu.Root>
+  )
+}
+
 function BoxMons() {
   const ohpkmStore = useOhpkmStore()
   const savesAndBanks = useSaves()
@@ -346,6 +355,7 @@ function BoxMons() {
             </BoxCell>
           ))}
       </Grid>
+      {BoxDisplayCellContextMenu()}
       <PokemonDetailsModal
         mon={selectedMon}
         onClose={() => setSelectedIndex(undefined)}
