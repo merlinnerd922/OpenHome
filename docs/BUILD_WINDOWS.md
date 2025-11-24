@@ -13,7 +13,7 @@ npm -v
 
 ## Download and Install Rust
 
-You need to download Rust perferably using `rustup`. You may need the Windows C++ build tools. Get it from here https://www.rust-lang.org/tools/install.
+You need to download Rust preferably using `rustup`. You may need the Windows C++ build tools. Get it from here https://www.rust-lang.org/tools/install.
 
 ## Download the OpenHome source code
 
@@ -34,4 +34,4 @@ These will take a bit. When they're finished, execute the following command to o
 explorer.exe .\src-tauri\target\release\
 ```
 
-A Windows Explorer window should open. In it you will find `OpenHome Setup x.x.x.exe` if you want to install it, or you can open `OpenHome.exe` directly from the `win-unpacked` folder. Enjoy!
+A Windows Explorer window should open. In it, you will find `OpenHome Setup x.x.x.exe` if you want to install it, or you can open `OpenHome.exe` directly from the `win-unpacked` folder. Enjoy!

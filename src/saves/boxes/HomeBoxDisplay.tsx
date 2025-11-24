@@ -351,7 +351,6 @@ function BoxMons() {
                 !dragData.save.supportsMon(mon.dexNum, mon.formeNum)
               }
             >
-              {HomeBoxPokemonContextMenu()}
             </BoxCell>
           ))}
       </Grid>
