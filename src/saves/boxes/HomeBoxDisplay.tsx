@@ -17,7 +17,7 @@ import { FaSquare } from 'react-icons/fa'
 import { AddIcon, DevIcon, EditIcon, MenuIcon, MoveIcon, RemoveIcon } from 'src/components/Icons'
 import PokemonDetailsModal from 'src/pokemon/PokemonDetailsModal'
 import { ErrorContext } from 'src/state/error'
-import { MonLocation, MonWithLocation } from 'src/state/saves/reducer'
+import { MonWithLocation } from 'src/state/saves/reducer'
 import { PKMInterface } from 'src/types/interfaces'
 import { OHPKM } from 'src/types/pkm/OHPKM'
 import { SortTypes } from 'src/types/pkm/sort'
@@ -50,6 +50,8 @@ import { useSaves } from '../../state/saves/useSaves'
 import { HomeBox, HomeData } from '../../types/SAVTypes/HomeData'
 import { filterUndefined } from '../../util/Sort'
 import './style.css'
+import BoxPokemonContextMenuWrapper from 'src/components/menu/boxPokemonContextMenuWrapper.tsx'
+import { MonLocation } from 'src/state/saves/monLocation.ts'
 
 const COLUMN_COUNT = 12
 const ROW_COUNT = 10
@@ -233,12 +235,12 @@ export default function HomeBoxDisplay() {
     </Card>
   )
 }
-
 function BoxMons() {
   const ohpkmStore = useOhpkmStore()
   const savesAndBanks = useSaves()
   const [, dispatchError] = useContext(ErrorContext)
   const [selectedIndex, setSelectedIndex] = useState<number>()
+  const [contextMenuMonWithLocation, setContextMenuMonWithLocation] = useState<MonWithLocation>()
   const [dragMonState] = useContext(DragMonContext)
 
   const homeData = savesAndBanks.homeData
@@ -306,43 +308,57 @@ function BoxMons() {
 
   return (
     <>
-      <Grid columns={COLUMN_COUNT.toString()} gap="1">
-        {lodash
-          .range(COLUMN_COUNT * ROW_COUNT)
-          .map((index: number) => currentBox.pokemon[index])
-          .map((mon, index) => (
-            <BoxCell
-              key={`${homeData.currentPCBox}-${index}`}
-              onClick={() => setSelectedIndex(index)}
-              dragID={`home_${homeData.currentPCBox}_${index}`}
-              location={{
-                bank: homeData.currentBankIndex,
-                box: homeData.currentPCBox,
-                box_slot: index,
-                is_home: true,
-              }}
-              mon={mon}
-              zIndex={0}
-              onDrop={(importedMons) => {
-                if (importedMons) {
-                  attemptImportMons(importedMons, {
-                    bank: homeData.currentBankIndex,
+      <BoxPokemonContextMenuWrapper>
+        <Grid columns={COLUMN_COUNT.toString()} gap="1">
+          {lodash
+            .range(COLUMN_COUNT * ROW_COUNT)
+            .map((index: number) => currentBox.pokemon[index])
+            .map((mon, slotIndex) => (
+              <BoxCell
+                key={`${homeData.currentPCBox}-${slotIndex}`}
+                onClick={() => setSelectedIndex(slotIndex)}
+                onRightClick={() =>
+                  setContextMenuMonWithLocation({
                     box: homeData.currentPCBox,
-                    box_slot: index,
+                    box_slot: slotIndex,
+                    bank: homeData.currentBankIndex,
                     is_home: true,
-                  })
+                    save: undefined,
+                    mon: mon as PKMInterface,
+                  } as MonWithLocation)
                 }
-              }}
-              disabled={
-                // don't allow a swap with a pokémon not supported by the source save
-                mon &&
-                dragData &&
-                !dragData.is_home &&
-                !dragData.save.supportsMon(mon.dexNum, mon.formeNum)
-              }
-            />
-          ))}
-      </Grid>
+                dragID={`home_${homeData.currentPCBox}_${slotIndex}`}
+                location={{
+                  bank: homeData.currentBankIndex,
+                  box: homeData.currentPCBox,
+                  box_slot: slotIndex,
+                  is_home: true,
+                }}
+                mon={mon}
+                zIndex={0}
+                onDrop={(importedMons) => {
+                  if (importedMons) {
+                    attemptImportMons(importedMons, {
+                      bank: homeData.currentBankIndex,
+                      box: homeData.currentPCBox,
+                      box_slot: slotIndex,
+                      is_home: true,
+                    })
+                  }
+                }}
+                disabled={
+                  // don't allow a swap with a pokémon not supported by the source save
+                  mon &&
+                  dragData &&
+                  !dragData.is_home &&
+                  !dragData.save.supportsMon(mon.dexNum, mon.formeNum)
+                }
+              >
+                {''}
+              </BoxCell>
+            ))}
+        </Grid>
+      </BoxPokemonContextMenuWrapper>
       <PokemonDetailsModal
         mon={selectedMon}
         onClose={() => setSelectedIndex(undefined)}

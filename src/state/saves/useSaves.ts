@@ -4,7 +4,8 @@ import { PKMInterface } from '../../types/interfaces'
 import { OHPKM } from '../../types/pkm/OHPKM'
 import { SAV } from '../../types/SAVTypes/SAV'
 import { useOhpkmStore } from '../ohpkm/useOhpkmStore'
-import { MonLocation, MonWithLocation, OpenSavesState, SavesContext } from './reducer'
+import { MonWithLocation, OpenSavesState, SavesContext } from './reducer'
+import { MonLocation } from 'src/state/saves/monLocation.ts'
 
 export type SavesAndBanksManager = Required<Omit<OpenSavesState, 'error'>> & {
   allOpenSaves: readonly SAV[]

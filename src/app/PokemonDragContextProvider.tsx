@@ -7,8 +7,8 @@ import { getPublicImageURL } from '../images/images'
 import { getItemIconPath } from '../images/items'
 import { DragMonContext, DragPayload } from '../state/dragMon'
 import { useOhpkmStore } from '../state/ohpkm/useOhpkmStore'
-import { MonLocation } from '../state/saves/reducer'
 import { useSaves } from '../state/saves/useSaves'
+import { MonLocation } from 'src/state/saves/monLocation.ts'
 
 export default function PokemonDragContextProvider(props: { children?: ReactNode }) {
   const { children } = props
@@ -28,46 +28,53 @@ export default function PokemonDragContextProvider(props: { children?: ReactNode
 
         if (!payload) return
 
-        if (payload.kind === 'item') {
-          if (isMonLocation(dest) && target) {
-            // Avoid losing the second item if mon already holding same item
-            const destMon = savesAndBanks.getMonAtLocation(dest)
-            if (destMon?.heldItemIndex === payload.item.index) {
-              return
+        switch (payload.kind) {
+          case 'item':
+            if (isMonLocation(dest) && target) {
+              // Avoid losing the second item if mon already holding same item
+              const destMon = savesAndBanks.getMonAtLocation(dest)
+              if (destMon?.heldItemIndex === payload.item.index) {
+                return
+              }
+              savesAndBanks.setMonHeldItem(payload.item, dest)
+              bagDispatch({ type: 'remove_item', payload: { index: payload.item.index, qty: 1 } })
             }
-            savesAndBanks.setMonHeldItem(payload.item, dest)
-            bagDispatch({ type: 'remove_item', payload: { index: payload.item.index, qty: 1 } })
-          }
-        } else if (payload.kind === 'mon') {
-          const { mon } = payload.monData
+            break
+          case 'mon':
+            const { mon } = payload.monData
 
-          if (target?.id === 'to_release') {
-            savesAndBanks.releaseMonAtLocation(payload.monData)
-          } else if (target?.id === 'item-bag') {
-            if (mon.heldItemIndex) {
-              bagDispatch({ type: 'add_item', payload: { index: mon.heldItemIndex, qty: 1 } })
-              savesAndBanks.setMonHeldItem(undefined, payload.monData)
+            if (target?.id === 'to_release') {
+              savesAndBanks.releaseMonAtLocation(payload.monData)
+            } else if (target?.id === 'item-bag') {
+              if (mon.heldItemIndex) {
+                bagDispatch({ type: 'add_item', payload: { index: mon.heldItemIndex, qty: 1 } })
+                savesAndBanks.setMonHeldItem(undefined, payload.monData)
+              }
+            } else if (
+              isMonLocation(dest) &&
+              (dest.is_home || dest.save.supportsMon(mon.dexNum, mon.formeNum))
+            ) {
+              const source = payload.monData
+
+              // If moving mon outside of its save, start persisting this mon's data in OpenHome
+              // (if it isnt already)
+              if (source.save !== dest.save) {
+                ohpkmStore.overwrite(new OHPKM(mon))
+              }
+
+              // Move item to OpenHome bag if not supported by the save file
+              if (
+                mon.heldItemIndex &&
+                !dest.is_home &&
+                !dest.save?.supportsItem(mon.heldItemIndex)
+              ) {
+                bagDispatch({ type: 'add_item', payload: { index: mon.heldItemIndex, qty: 1 } })
+                mon.heldItemIndex = 0
+              }
+
+              savesAndBanks.moveMon(source, dest)
             }
-          } else if (
-            isMonLocation(dest) &&
-            (dest.is_home || dest.save.supportsMon(mon.dexNum, mon.formeNum))
-          ) {
-            const source = payload.monData
-
-            // If moving mon outside of its save, start persisting this mon's data in OpenHome
-            // (if it isnt already)
-            if (source.save !== dest.save) {
-              ohpkmStore.overwrite(new OHPKM(mon))
-            }
-
-            // Move item to OpenHome bag if not supported by the save file
-            if (mon.heldItemIndex && !dest.is_home && !dest.save?.supportsItem(mon.heldItemIndex)) {
-              bagDispatch({ type: 'add_item', payload: { index: mon.heldItemIndex, qty: 1 } })
-              mon.heldItemIndex = 0
-            }
-
-            savesAndBanks.moveMon(source, dest)
-          }
+            break
         }
 
         dispatchDragMonState({ type: 'end_drag' })

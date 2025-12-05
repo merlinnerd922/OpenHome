@@ -8,6 +8,7 @@ import { getMonFileIdentifier } from 'src/util/Lookup'
 import { PKMInterface } from '../../types/interfaces'
 import { getSortFunctionNullable, SortType } from '../../types/pkm/sort'
 import { OhpkmLookup } from '../ohpkm/useOhpkmStore'
+import { MonLocation } from 'src/state/saves/monLocation.ts'
 
 export type OpenSave = {
   index: number
@@ -26,17 +27,11 @@ export type OpenSavesState = {
   error?: string
 }
 
-export type MonLocation = {
-  box: number
-  box_slot: number
-} & (
-  | { is_home: false; bank?: undefined; save: SAV }
-  | { is_home: true; bank: number; save?: undefined }
-)
-
-export type MonWithLocation = MonLocation & {
+type MonWrapper = {
   mon: PKMInterface
 }
+
+export type MonWithLocation = MonLocation & MonWrapper
 
 export type OpenSavesAction =
   /*

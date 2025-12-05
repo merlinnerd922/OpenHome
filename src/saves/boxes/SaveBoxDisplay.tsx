@@ -8,7 +8,7 @@ import { MenuIcon } from 'src/components/Icons'
 import AttributeRow from 'src/pokemon/AttributeRow'
 import PokemonDetailsModal from 'src/pokemon/PokemonDetailsModal'
 import { ErrorContext } from 'src/state/error'
-import { MonLocation } from 'src/state/saves/reducer'
+import { MonWithLocation } from 'src/state/saves/reducer'
 import { PKMInterface } from 'src/types/interfaces'
 import { OHPKM } from 'src/types/pkm/OHPKM'
 import { getMonFileIdentifier } from 'src/util/Lookup'
@@ -19,12 +19,27 @@ import { colorIsDark } from '../../util/color'
 import { buildBackwardNavigator, buildForwardNavigator } from '../util'
 import ArrowButton from './ArrowButton'
 import BoxCell from './BoxCell'
+import { Box } from 'src/types/SAVTypes/SAV.ts'
+import { MonLocation } from 'src/state/saves/monLocation.ts'
+import BoxPokemonContextMenuWrapper from 'src/components/menu/boxPokemonContextMenuWrapper.tsx'
 
 interface OpenSaveDisplayProps {
   saveIndex: number
 }
 
 const ALLOW_DUPE_IMPORT = true
+
+function useMonAtIndex(
+  currentBox: Box<PKMInterface> | undefined,
+  index: number | undefined
+): undefined | PKMInterface | OHPKM {
+  return useMemo(() => {
+    if (!currentBox || index === undefined || index >= currentBox.pokemon.length) {
+      return undefined
+    }
+    return currentBox.pokemon[index]
+  }, [currentBox, index])
+}
 
 const OpenSaveDisplay = (props: OpenSaveDisplayProps) => {
   const savesAndBanks = useSaves()
@@ -35,6 +50,7 @@ const OpenSaveDisplay = (props: OpenSaveDisplayProps) => {
   const [selectedIndex, setSelectedIndex] = useState<number>()
   const [dragMonState] = useContext(DragMonContext)
   const backend = useContext(BackendContext)
+  const [ContextMenuMonWithLocation, setContextMenuMonWithLocation] = useState<MonWithLocation>()
 
   const save = useMemo(
     () => savesAndBanks.allOpenSaves[saveIndex],
@@ -46,12 +62,7 @@ const OpenSaveDisplay = (props: OpenSaveDisplayProps) => {
     [save.boxes, save.currentPCBox]
   )
 
-  const selectedMon = useMemo(() => {
-    if (!currentBox || selectedIndex === undefined || selectedIndex >= currentBox.pokemon.length) {
-      return undefined
-    }
-    return currentBox.pokemon[selectedIndex]
-  }, [currentBox, selectedIndex])
+  const selectedMon = useMonAtIndex(currentBox, selectedIndex)
 
   const attemptImportMons = (mons: PKMInterface[], location: MonLocation) => {
     const unsupportedMons = mons.filter((mon) => !save.supportsMon(mon.dexNum, mon.formeNum))
@@ -191,40 +202,57 @@ const OpenSaveDisplay = (props: OpenSaveDisplayProps) => {
               />
             </Flex>
           </div>
-          <Grid columns={save.boxColumns.toString()} gap="1" p="1">
-            {lodash
-              .range(save.boxColumns * save.boxRows)
-              .map((index: number) => currentBox?.pokemon?.[index])
-              .map((mon, index) => (
-                <BoxCell
-                  onClick={() => setSelectedIndex(index)}
-                  key={`${save.currentPCBox}-${index}`}
-                  dragID={`${save.tid}_${save.sid}_${save.currentPCBox}_${index}`}
-                  location={{
-                    is_home: false,
-                    box: save.currentPCBox,
-                    box_slot: index,
-                    save,
-                  }}
-                  disabled={
-                    isDisabled || save.getSlotMetadata?.(save.currentPCBox, index)?.isDisabled
-                  }
-                  disabledReason={save.getSlotMetadata?.(save.currentPCBox, index)?.disabledReason}
-                  mon={mon}
-                  zIndex={1}
-                  onDrop={(importedMons) => {
-                    if (importedMons) {
-                      attemptImportMons(importedMons, {
-                        is_home: false,
-                        save,
-                        box: save.currentPCBox,
-                        box_slot: index,
-                      })
+          <BoxPokemonContextMenuWrapper>
+            <Grid columns={save.boxColumns.toString()} gap="1" p="1">
+              {lodash
+                .range(save.boxColumns * save.boxRows)
+                .map((index: number) => currentBox?.pokemon?.[index])
+                .map((mon, index) => (
+                  <BoxCell
+                    onClick={() => setSelectedIndex(index)}
+                    key={`${save.currentPCBox}-${index}`}
+                    dragID={`${save.tid}_${save.sid}_${save.currentPCBox}_${index}`}
+                    location={{
+                      is_home: false,
+                      box: save.currentPCBox,
+                      box_slot: index,
+                      save: save,
+                    }}
+                    disabled={
+                      isDisabled || save.getSlotMetadata?.(save.currentPCBox, index)?.isDisabled
                     }
-                  }}
-                />
-              ))}
-          </Grid>
+                    disabledReason={
+                      save.getSlotMetadata?.(save.currentPCBox, index)?.disabledReason
+                    }
+                    mon={mon}
+                    zIndex={1}
+                    onDrop={(importedMons) => {
+                      if (importedMons) {
+                        attemptImportMons(importedMons, {
+                          is_home: false,
+                          save,
+                          box: save.currentPCBox,
+                          box_slot: index,
+                        })
+                      }
+                    }}
+                    onRightClick={() => {
+                      if (mon !== null) {
+                        setContextMenuMonWithLocation({
+                          bank: undefined,
+                          is_home: false,
+                          save: save,
+                          mon: mon as PKMInterface,
+                          ...{ box: save.currentPCBox, box_slot: index },
+                        })
+                      }
+                    }}
+                  >
+                    {''}
+                  </BoxCell>
+                ))}
+            </Grid>
+          </BoxPokemonContextMenuWrapper>
         </Card>
         <Dialog.Root open={detailsModal} onOpenChange={setDetailsModal}>
           <Dialog.Content

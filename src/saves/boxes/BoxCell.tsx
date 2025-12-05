@@ -1,8 +1,7 @@
 import { useDroppable } from '@dnd-kit/react'
-import { useContext, useMemo } from 'react'
+import React, { PropsWithChildren, useContext, useMemo } from 'react'
 import { BackendContext } from 'src/backend/backendContext'
 import { FilterContext } from 'src/state/filter'
-import { MonLocation } from 'src/state/saves/reducer'
 import { bytesToPKM } from 'src/types/FileImport'
 import { filterApplies } from 'src/types/Filter'
 import { PKMInterface } from 'src/types/interfaces'
@@ -12,9 +11,11 @@ import useDisplayError from '../../hooks/displayError'
 import '../style.css'
 import DraggableMon from './DraggableMon'
 import DroppableSpace from './DroppableSpace'
+import { MonLocation } from 'src/state/saves/monLocation.ts'
 
-interface BoxCellProps {
+interface BoxCellProps extends PropsWithChildren {
   onClick: () => void
+  onRightClick: () => void
   onDrop: (_: PKMInterface[]) => void
   disabled?: boolean
   disabledReason?: string
@@ -23,6 +24,7 @@ interface BoxCellProps {
   borderColor?: string
   dragID: string
   location: MonLocation
+  children: React.ReactNode
 }
 
 const BoxCell = ({
