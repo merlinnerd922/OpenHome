@@ -50,7 +50,7 @@ const OpenSaveDisplay = (props: OpenSaveDisplayProps) => {
   const [selectedIndex, setSelectedIndex] = useState<number>()
   const [dragMonState] = useContext(DragMonContext)
   const backend = useContext(BackendContext)
-  const [ContextMenuMonWithLocation, setContextMenuMonWithLocation] = useState<MonWithLocation>()
+  const [contextMenuMonWithLocation, setContextMenuMonWithLocation] = useState<MonWithLocation>()
 
   const save = useMemo(
     () => savesAndBanks.allOpenSaves[saveIndex],
@@ -202,7 +202,7 @@ const OpenSaveDisplay = (props: OpenSaveDisplayProps) => {
               />
             </Flex>
           </div>
-          <BoxPokemonContextMenuWrapper>
+          <BoxPokemonContextMenuWrapper monWithLocation={contextMenuMonWithLocation}>
             <Grid columns={save.boxColumns.toString()} gap="1" p="1">
               {lodash
                 .range(save.boxColumns * save.boxRows)

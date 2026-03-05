@@ -308,7 +308,7 @@ function BoxMons() {
 
   return (
     <>
-      <BoxPokemonContextMenuWrapper>
+      <BoxPokemonContextMenuWrapper monWithLocation={contextMenuMonWithLocation}>
         <Grid columns={COLUMN_COUNT.toString()} gap="1">
           {lodash
             .range(COLUMN_COUNT * ROW_COUNT)
